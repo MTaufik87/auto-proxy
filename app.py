@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# Kunci diambil dari persekitaran rahsia Vercel nanti
+# Kunci diambil dari persekitaran rahsia Vercel
 API_KEY = os.environ.get("API_KEY_1FICHIER")
 
 @app.route('/play')
@@ -14,8 +14,10 @@ def play_video():
     if not file_id:
         return "RALAT: Sila masukkan ID fail.", 400
 
-    url_fail = f"[https://1fichier.com/](https://1fichier.com/)?{file_id}"
-    url_api = "[https://api.1fichier.com/v1/download/get_token.cgi](https://api.1fichier.com/v1/download/get_token.cgi)"
+    url_fail = f"https://1fichier.com/?{file_id}"
+    
+    # URL ini telah dibersihkan daripada kurungan pelik
+    url_api = "https://api.1fichier.com/v1/download/get_token.cgi"
     
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -33,4 +35,3 @@ def play_video():
         return f"Ralat 1Fichier: {respons.status_code}", 500
     except Exception as e:
         return f"Ralat Sistem: {str(e)}", 500
-      
