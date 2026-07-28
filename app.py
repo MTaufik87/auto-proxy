@@ -2,6 +2,37 @@ from flask import Flask, request, redirect
 import requests
 import os
 
+# =========================================================
+# TETAPAN KASTAM DNS (Integrasi Purple DNS: 94.140.14.14)
+# =========================================================
+try:
+    import dns.resolver
+    import urllib3.util.connection
+    
+    original_create_connection = urllib3.util.connection.create_connection
+
+    def custom_create_connection(address, *args, **kwargs):
+        host, port = address
+        try:
+            # Semak jika ia sudah IP address
+            if host.replace('.', '').isdigit():
+                ip = host
+            else:
+                resolver = dns.resolver.Resolver(configure=False)
+                resolver.nameservers = ['94.140.14.14', '94.140.15.15']
+                answers = resolver.resolve(host, 'A')
+                ip = answers[0].to_text()
+        except Exception:
+            ip = host
+
+        return original_create_connection((ip, port), *args, **kwargs)
+
+    urllib3.util.connection.create_connection = custom_create_connection
+    print("✅ Enjin Purple DNS berjaya diaktifkan!")
+except ImportError:
+    print("⚠️ Module 'dnspython' tidak dijumpai. Sila pastikan ia ada dalam requirements.txt")
+# =========================================================
+
 app = Flask(__name__)
 
 # Kunci diambil dari persekitaran rahsia Vercel
