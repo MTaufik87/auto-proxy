@@ -1,9 +1,10 @@
-from flask import Flask, request, Response
+from flask import Flask, request, redirect
 import requests
 import os
 
 app = Flask(__name__)
 
+# Kunci API 1Fichier daripada persekitaran Vercel
 API_KEY = os.environ.get("API_KEY_1FICHIER")
 
 @app.route('/play')
@@ -23,24 +24,13 @@ def play_video():
     payload = {"url": url_fail, "inline": 1}
     
     try:
-        # Dapatkan pautan terus daripada 1Fichier
         respons = requests.post(url_api, json=payload, headers=headers, timeout=10)
-        if respons.status_code != 200:
-            return f"Ralat 1Fichier: {respons.status_code}", 500
-            
-        pautan_terus = respons.json().get("url")
-        if not pautan_terus:
-            return "Gagal mendapatkan pautan video.", 500
-
-        # Alirkan (Stream) video melalui pelayan perantara Vercel
-        req_video = requests.get(pautan_terus, stream=True)
-        
-        return Response(
-            req_video.iter_content(chunk_size=1024*64),
-            status=req_video.status_code,
-            content_type=req_video.headers.get('content-type', 'video/mp4'),
-            direct_passthrough=True
-        )
-        
+        if respons.status_code == 200:
+            pautan_terus = respons.json().get("url")
+            if pautan_terus:
+                # Hala tuju (redirect) terus ke pautan 1Fichier untuk kelajuan maksimum
+                return redirect(pautan_terus)
+            return f"Gagal menjana pautan: {respons.json()}", 500
+        return f"Ralat 1Fichier: {respons.status_code}", 500
     except Exception as e:
         return f"Ralat Sistem: {str(e)}", 500
