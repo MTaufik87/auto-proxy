@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# Kunci API 1Fichier daripada persekitaran Vercel
+# Kunci API 1Fichier daripada persekitaran pelayan
 API_KEY = os.environ.get("API_KEY_1FICHIER")
 
 @app.route('/play')
@@ -24,13 +24,17 @@ def play_video():
     payload = {"url": url_fail, "inline": 1}
     
     try:
-        respons = requests.post(url_api, json=payload, headers=headers, timeout=10)
+        # Menghantar permintaan kepada 1Fichier dengan masa menunggu 15 saat
+        respons = requests.post(url_api, json=payload, headers=headers, timeout=15)
         if respons.status_code == 200:
             pautan_terus = respons.json().get("url")
             if pautan_terus:
-                # Hala tuju (redirect) terus ke pautan 1Fichier untuk kelajuan maksimum
+                # Hala tuju (redirect) ke pautan video 1Fichier
                 return redirect(pautan_terus)
             return f"Gagal menjana pautan: {respons.json()}", 500
         return f"Ralat 1Fichier: {respons.status_code}", 500
     except Exception as e:
         return f"Ralat Sistem: {str(e)}", 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
